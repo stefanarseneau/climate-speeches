@@ -5,11 +5,17 @@ import os
 import argparse
 import pandas as pd
 
-from pdfminer.high_level import extract_text
+from pdfminer.pdfparser import PDFParser
+from pdfminer.pdfdocument import PDFDocument
+from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
+from pdfminer.pdfpage import PDFPage
+from pdfminer.converter import XMLConverter, HTMLConverter, TextConverter
+from pdfminer.layout import LAParams
 import unicodedata
 
 import zipfile
 from urllib.request import urlopen
+from datasets import Dataset, DatasetDict
 
 class CleanReader:
     def __init__(self, url: str) -> None:
@@ -22,7 +28,21 @@ class CleanReader:
     def read_pdf(self) -> str:
         remotepdf = urlopen(self.url)
         pdfmemory = io.BytesIO(remotepdf.read())
-        text = extract_text(pdfmemory) # read in the pdf
+        
+        rsrcmgr = PDFResourceManager()
+        retstr = io.StringIO()
+        codec = 'utf-8'
+        laparams = LAParams()
+        laparams.all_texts = False
+        laparams.detect_vertical = False
+        device = TextConverter(rsrcmgr, retstr, codec=codec, laparams=laparams)
+        # Create a PDF interpreter object.
+        interpreter = PDFPageInterpreter(rsrcmgr, device)
+        for page in PDFPage.get_pages(pdfmemory):
+            interpreter.process_page(page)
+            text = retstr.getvalue()
+
+        text = text.replace("\\n", "\n") # read in the pdf
         return text
 
     def string_format(self, text: str) -> str:
@@ -32,49 +52,14 @@ class CleanReader:
         text = [unicodedata.normalize('NFKD', line) for line in text if line]
         return text
 
-    def replace_ligatures(self, text: str) -> str:
-        ligatures = {
-            "ﬀ": "ff",
-            "ﬁ": "fi",
-            "ﬂ": "fl",
-            "ﬃ": "ffi",
-            "ﬄ": "ffl",
-            "ﬅ": "ft",
-            "ﬆ": "st",
-            # "Ꜳ": "AA",
-            # "Æ": "AE",
-            "ꜳ": "aa",
-        }
-        for search, replace in ligatures.items():
-            text = text.replace(search, replace)
-        return text
-
-
-    def remove_footer(self, extracted_texts: list[str], page_labels: list[str]):
-        def remove_page_labels(extracted_texts, page_labels):
-            processed = []
-            for text, label in zip(extracted_texts, page_labels):
-                text_left = text.lstrip()
-                if text_left.startswith(label):
-                    text = text_left[len(label) :]
-
-                text_right = text.rstrip()
-                if text_right.endswith(label):
-                    text = text_right[: -len(label)]
-
-                processed.append(text)
-            return processed
-
-        extracted_texts = remove_page_labels(extracted_texts, page_labels)
-        return extracted_texts
 
 class DataLoader:
     def __init__(self, n: int, savefile: bool) -> None:
         self.data = self.load_zipfile()
         self.n = n if n is not None else len(self.data)
         self.savefile = savefile
-
-        self.build_dataframe()
+        self.speechdata_pd = self.build_dataframe()
+        self.speechdata_hf = Dataset.from_pandas(self.speechdata_pd)
 
     def load_zipfile(self) -> pd.DataFrame:
         path = 'https://www.boj.or.jp/en/research/wps_rev/wps_2023/data/wp23e14.zip'
@@ -95,24 +80,19 @@ class DataLoader:
         return data
 
     
-    def build_dataframe(self) -> dict:
+    def build_dataframe(self) -> pd.DataFrame:
         self.data['url'] = ['https://bis.org/review/{}.pdf'.format(self.data['id'][i]) 
                        for i in range(len(self.data))]
-        
-        speechdata = {}
+        speechdata = pd.DataFrame(columns=['id', 'paragraph'])
         for i in range(self.n):
             # read the text and write it to a dataframe
             text = CleanReader(self.data['url'][i]).text
             id_col = [self.data['id'][i]]*len(text)
             text_df = pd.DataFrame({'id': id_col, 'paragraph': text})
-
-            # put this into a dictionary
-            speechdata[self.data['id'][i]] = text_df
-            
+            speechdata = pd.concat([speechdata, text_df])
             # save the file
             if self.savefile:
                 text_df.to_csv(f'data/{self.data['id'][i]}.csv')
-
         return speechdata
 
     
@@ -126,4 +106,5 @@ if __name__ == "__main__":
     n = int(args.n)
     savefile = args.savefile
 
-    DataLoader(n, savefile)
+    a = DataLoader(n, savefile)
+    a.speechdata_pd.to_csv('test.csv')
