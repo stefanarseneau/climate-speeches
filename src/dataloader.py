@@ -13,6 +13,10 @@ from pdfminer.converter import XMLConverter, HTMLConverter, TextConverter
 from pdfminer.layout import LAParams
 import unicodedata
 
+import requests
+import pytesseract
+from pdf2image import convert_from_bytes
+
 import zipfile
 from urllib.request import urlopen
 from datasets import Dataset, DatasetDict
@@ -26,8 +30,8 @@ class CleanReader:
         self.text = self.string_format(temp_text)
 
     def read_pdf(self) -> str:
-        remotepdf = urlopen(self.url)
-        pdfmemory = io.BytesIO(remotepdf.read())
+        remotepdf = requests.get(self.url, stream=True, timeout=30).raw.read()
+        pdfmemory = io.BytesIO(remotepdf)
         
         rsrcmgr = PDFResourceManager()
         retstr = io.StringIO()
@@ -36,6 +40,7 @@ class CleanReader:
         laparams.all_texts = False
         laparams.detect_vertical = False
         device = TextConverter(rsrcmgr, retstr, codec=codec, laparams=laparams)
+        
         # Create a PDF interpreter object.
         interpreter = PDFPageInterpreter(rsrcmgr, device)
         for page in PDFPage.get_pages(pdfmemory):
@@ -43,13 +48,20 @@ class CleanReader:
             text = retstr.getvalue()
 
         text = text.replace("\\n", "\n") # read in the pdf
+
+        if '(cid:' in text:
+            pages = convert_from_bytes(remotepdf)
+            
+            text = ""
+            for pageNum,imgBlob in enumerate(pages):
+                text += pytesseract.image_to_string(imgBlob,lang='eng')
+
         return text
 
     def string_format(self, text: str) -> str:
         # clean the pdf formatting artifacts
-        text = text.split('\n\n')
-        text = [line.replace('\n', ' ') for line in text]
-        text = [unicodedata.normalize('NFKD', line) for line in text if line]
+        text = text.replace('\n', ' ')
+        text = unicodedata.normalize('NFKD', text)       
         return text
 
 
@@ -99,12 +111,9 @@ class DataLoader:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('-n', nargs='?', default=None, help='number of speeches')
-    parser.add_argument('--savefile', action='store_true')
+    parser.add_argument('id', nargs='?', default=None, help='number of speeches')
     args = parser.parse_args()
-    
-    n = int(args.n)
-    savefile = args.savefile
 
-    a = DataLoader(n, savefile)
-    a.speechdata_pd.to_csv('test.csv')
+    path = f'https://bis.org/review/{args.id}.pdf'
+    pdf = CleanReader(path)
+    print(pdf.text)
