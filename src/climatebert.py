@@ -35,15 +35,16 @@ class ClimateBert:
 
 if __name__ == "__main__":
    parser = argparse.ArgumentParser()
+   parser.add_argument('id', nargs='?')
    parser.add_argument('--sentence_chunking', nargs='?', default=None)
-   parser.add_argument('--savefile', action='store_true')
+   parser.add_argument('--score-weighting', nargs='?', default='1')
    args = parser.parse_args()
 
    climate_speeches = dl.load_zipfile()
     
    # If you want to use your own data, simply load them as 🤗 Datasets dataset, see https://huggingface.co/docs/datasets/loading
    #dataset = datasets.load_dataset(dataset_name, split="test")
-   datafr = dl.DataLoader('r221222a', sentence_chunking = int(args.sentence_chunking))
+   datafr = dl.DataLoader(args.id, sentence_chunking = int(args.sentence_chunking))
    dataset_hf = datafr.speechdata_hf
    dataset_pd = datafr.speechdata_pd
 
@@ -54,7 +55,7 @@ if __name__ == "__main__":
    dataset_pd['label'] = labels
    dataset_pd['score'] = scores 
 
-   score = summation_score(dataset_pd, weight = 3)
+   score = summation_score(dataset_pd, weight = int(args.score_weighting))
    print('final score:', score)
 
    dataset_pd.to_csv('test.csv')
