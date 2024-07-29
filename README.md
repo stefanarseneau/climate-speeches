@@ -10,7 +10,7 @@ python src/climatebert.py [id] --sentence-chunking=[integer] --score-weighting=[
     score-weighting     :   the factor by which to weight a climate-related paragraph over a non-climate-related paragraph
 ```
 
-Running this for a single speech will output a unitless final score. Speeches with very little climate-related content will receive scores close to `-1`. Speeches that are very climate-related will recieve a more positive score, the magnitude of which is determined by the weighting coefficient specified in the script call.
+Running this for a single speech will output a unitless final score. Speeches with very little climate-related content will receive scores close to -1. Speeches that are very climate-related will recieve a more positive score, the magnitude of which is determined by the weighting coefficient specified in the script call.
 
 The classifier works by splitting the text of each speech into chunks of several sentences (a number controlled by the `sentence-chunking` parameter). Each chunk of sentences is assigned a label (`yes` or `no`) that states whether that chunk is climate-related, as well as a score between zero and one that quanitifies the confidence of the assigned label. Once an entire speech has been processed by ClimateBERT, the results are two vectors: one containing `yes||no` labels, and one containing confidence scores. 
 
