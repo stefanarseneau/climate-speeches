@@ -30,8 +30,8 @@ To process the speech [Challenges and Opportunities in Scaling up Green Finance]
 
 ```
 arsen@arsen:/home/arsen/climate-speeches$ python src/climatebert.py r221222a --sentence_chunking=5 --score-weighting=3
-100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 30/30 [00:02<00:00, 12.59it/s]
-final score: 0.7107816815376282
+100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 1/1 [00:03<00:00,  3.94s/it]
+speech r221222a final score: 0.983086347579956
 ```
 
 The final score is positive, which we can interpret as a climate-related speech.

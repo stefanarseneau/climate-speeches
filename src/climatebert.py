@@ -9,12 +9,6 @@ import numpy as np
 import dataloader as dl
 import argparse
 
-def summation_score(pd_dataset, weight):
-   classifier = 2*np.all([pd_dataset['label'] == 'yes'], axis = 0).astype(int) - 1
-   classifier[classifier > 0] *= weight
-   score = sum(classifier * pd_dataset['score']) / len(pd_dataset)
-   return score
-
 class ClimateBert:
    def __init__(self, max_len: int = 512):
       self.dataset_name = "climatebert/climate_commitments_actions"
@@ -22,16 +16,42 @@ class ClimateBert:
 
       self.model = AutoModelForSequenceClassification.from_pretrained(self.model_name)
       self.tokenizer = AutoTokenizer.from_pretrained(self.model_name, max_len=max_len)
+
+      # See https://huggingface.co/docs/transformers/main_classes/pipelines#transformers.pipeline
       self.pipe = pipeline("text-classification", model=self.model, tokenizer=self.tokenizer, device=0)
 
    def __call__(self, dataset):
       labels, scores = [], []
-      for out in tqdm(self.pipe(KeyDataset(dataset, "paragraph"), padding=True, truncation=True)):
+      for out in self.pipe(KeyDataset(dataset, "paragraph"), padding=True, truncation=True):
          labels.append(out['label'])
          scores.append(out['score'])
       return labels, scores
    
-        
+def summation_score(pd_dataset, weight):
+   classifier = 2*np.all([pd_dataset['label'] == 'yes'], axis = 0).astype(int) - 1
+   classifier[classifier > 0] *= weight
+   score = sum(classifier * pd_dataset['score']) / len(pd_dataset)
+   return score
+
+def classify_speeches(ids, sentence_chunking, score_weighting):
+   scores = []
+
+   climate_speeches = dl.load_zipfile()
+   CB_Classifier = ClimateBert()
+
+   for i, id in enumerate(tqdm(ids)):
+      datafr = dl.DataLoader(id, sentence_chunking = int(sentence_chunking))
+      dataset_hf = datafr.speechdata_hf
+      dataset_pd = datafr.speechdata_pd
+
+      labels, scores = CB_Classifier(dataset_hf)
+      dataset_pd['label'] = labels
+      dataset_pd['score'] = scores 
+
+      score = summation_score(dataset_pd, weight = int(args.score_weighting))
+      scores.append(score)
+
+   return scores
 
 if __name__ == "__main__":
    parser = argparse.ArgumentParser()
@@ -40,22 +60,11 @@ if __name__ == "__main__":
    parser.add_argument('--score-weighting', nargs='?', default='1')
    args = parser.parse_args()
 
-   climate_speeches = dl.load_zipfile()
-    
-   # If you want to use your own data, simply load them as 🤗 Datasets dataset, see https://huggingface.co/docs/datasets/loading
-   #dataset = datasets.load_dataset(dataset_name, split="test")
-   datafr = dl.DataLoader(args.id, sentence_chunking = int(args.sentence_chunking))
-   dataset_hf = datafr.speechdata_hf
-   dataset_pd = datafr.speechdata_pd
+   scores = classify_speeches([args.id], int(args.sentence_chunking), int(args.score_weighting))
+   print('speech', args.id, 'final score:', scores[0])
+   
 
-   CB_Classifier = ClimateBert()
+   
 
-   # See https://huggingface.co/docs/transformers/main_classes/pipelines#transformers.pipeline
-   labels, scores = CB_Classifier(dataset_hf)
-   dataset_pd['label'] = labels
-   dataset_pd['score'] = scores 
-
-   score = summation_score(dataset_pd, weight = int(args.score_weighting))
-   print('final score:', score)
-
-   dataset_pd.to_csv('test.csv')
+   
+   
