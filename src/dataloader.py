@@ -50,6 +50,7 @@ class DataLoader:
         speech = self.search_index[self.search_index.url.str.contains(id)]
         assert len(speech) == 1
 
+        url = speech['url'].iloc[0]
         title = speech['title'].iloc[0]
         description = speech['description'].iloc[0]
         author = speech['author'].iloc[0]
@@ -68,7 +69,7 @@ class DataLoader:
         speechdata_pd = self.build_dataframe(text, id, sentence_chunking)
         speechdata_hf = Dataset.from_pandas(speechdata_pd)
 
-        return title, description, author, date, text, speechdata_pd, speechdata_hf
+        return url, title, description, author, date, text, speechdata_pd, speechdata_hf
     
     def build_dataframe(self, text: str, id: str, sentence_chunking: int) -> pd.DataFrame:
         speechdata = pd.DataFrame()
@@ -87,7 +88,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     dat = DataLoader()
-    title, description, author, date, text, speechdata_pd, speechdata_hf = dat.fetch_text(args.id, sentence_chunking=5)
+    url, title, description, author, date, text, speechdata_pd, speechdata_hf = dat.fetch_text(args.id, sentence_chunking=5)
 
     print(title)
     print(text)

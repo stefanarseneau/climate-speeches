@@ -41,7 +41,7 @@ def classify_speeches(ids, sentence_chunking, score_weighting):
    CB_Classifier = ClimateBert()
 
    for i, id in enumerate(tqdm(ids)):
-      title, description, author, date, text, dataset_pd, dataset_hf = dat.fetch_text(id, sentence_chunking = int(sentence_chunking))
+      url, title, description, author, date, text, dataset_pd, dataset_hf = dat.fetch_text(id, sentence_chunking = int(sentence_chunking))
 
       labels, scores = CB_Classifier(dataset_hf)
       dataset_pd['label'] = labels
