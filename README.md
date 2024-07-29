@@ -16,7 +16,7 @@ The classifier works by splitting the text of each speech into chunks of several
 
 This vector is aggregated into a total final score as follows. For each element of the score vector, if the corresponding label is `yes`, that score is multiplied by the specified weight factor. If the corresponding label is `no`, the score is multiplied by -1. This results in a vector containing the weighted confidence values for each chunk of sentences, which is then summed to compute the final score. A good choice for weight seems to be around 3, but further calibration will be necessary.
 
-**Next Steps**
+### Next Steps
 
 We'll need to calibrate the model by choosing the optimal weight to correctly classify each speech. I'll probably do this by splitting Mitsuhiro's dataset into a 35% test portion and an 65% validation portion. That way I can choose the best weight using a grid search on the results of the 35% test portion. Then the 65% validation portion remains an independent sample that can be tested against.
 
@@ -24,7 +24,7 @@ I also need to implement GPT-3.5, but that will come later since it costs money.
 
 ---
 
-**Example**
+### Example
 
 To process the speech [Challenges and Opportunities in Scaling up Green Finance](https://www.bis.org/review/r221222a.pdf), which is of course climate change related, we can run the classifier with `sentence-chunking = 5` and `score-weighting = 3`, which are both good choices:
 
