@@ -36,13 +36,12 @@ def summation_score(pd_dataset, weight):
 def classify_speeches(ids, sentence_chunking, score_weighting):
    scores = []
 
+   dat = dl.DataLoader()
    climate_speeches = dl.load_zipfile()
    CB_Classifier = ClimateBert()
 
    for i, id in enumerate(tqdm(ids)):
-      datafr = dl.DataLoader(id, sentence_chunking = int(sentence_chunking))
-      dataset_hf = datafr.speechdata_hf
-      dataset_pd = datafr.speechdata_pd
+      title, description, author, date, text, dataset_pd, dataset_hf = dat.fetch_text(id, sentence_chunking = int(sentence_chunking))
 
       labels, scores = CB_Classifier(dataset_hf)
       dataset_pd['label'] = labels
