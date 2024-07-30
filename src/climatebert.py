@@ -37,7 +37,6 @@ def classify_speeches(ids, sentence_chunking, score_weighting):
    scores = []
 
    dat = dl.DataLoader()
-   climate_speeches = dl.load_zipfile()
    CB_Classifier = ClimateBert()
 
    for i, id in enumerate(tqdm(ids)):
