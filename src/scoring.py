@@ -19,7 +19,7 @@ def fetch_dataset(dataset_name):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('dataset', nargs='?')
-    parser.add_argument('--sentence_chunking', nargs='?', default=None)
+    parser.add_argument('--sentence-chunking', nargs='?', default=None)
     parser.add_argument('--score-weighting', nargs='?', default='1')
     args = parser.parse_args()
 

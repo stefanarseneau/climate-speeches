@@ -14,4 +14,8 @@ echo "Start Job $SLURM_ARRAY_TASK_ID on $HOSTNAME"  # Display job start informat
 module load anaconda
 conda activate mlenv
 
+echo "Using dataset $1"
+echo "Sentence chunking param: $2"
+echo "Score weighting param: $3"
+
 python src/scoring.py $1  --sentence-chunking=$2 --score-weighting=$3
