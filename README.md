@@ -4,8 +4,8 @@
 This repo contains code for assessing the ability of different LLMs to identify central bank speeches from the BIS with content related to climate change. We benchmark against ClimateBERT and GPT-3.5. Benchmarking against ClimateBERT can be performed by running the command:
 
 ```
-python src/climatebert.py [id] --sentence-chunking=[integer] --score-weighting=[integer]
-    id                  :   the identifier of the speech in the BIS database
+python src/scoring.py [dataset] --sentence-chunking=[integer] --score-weighting=[integer]
+    dataset             :   the name of the dataset to use ('identified' or 'all')
     sentence-chunking   :   the number of sentences to feed into ClimateBERT at a time 
     score-weighting     :   the factor by which to weight a climate-related paragraph over a non-climate-related paragraph
 ```
@@ -35,3 +35,12 @@ speech r221222a final score: 0.983086347579956
 ```
 
 The final score is positive, which we can interpret as a climate-related speech.
+
+---
+
+### Running The SLURM Script
+
+To run the classifier on a compute cluster that uses SLURM, run the command:
+```
+sbatch run_classifier.sh [dataset] [sentence-chunking] [score-weighting]
+```

@@ -42,7 +42,7 @@ def classify_speeches(ids, sentence_chunking, score_weighting):
    for i, id in enumerate(tqdm(ids)):
       url, title, description, author, date, text, dataset_pd, dataset_hf = dat.fetch_text(id, sentence_chunking = int(sentence_chunking))
 
-      if dataset_hf is not '':
+      if dataset_hf != '':
           labels, scores = CB_Classifier(dataset_hf)
           dataset_pd['label'] = labels
           dataset_pd['score'] = scores 
