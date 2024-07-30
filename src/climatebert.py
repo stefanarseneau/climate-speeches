@@ -18,7 +18,7 @@ class ClimateBert:
       self.tokenizer = AutoTokenizer.from_pretrained(self.model_name, max_len=max_len)
 
       # See https://huggingface.co/docs/transformers/main_classes/pipelines#transformers.pipeline
-      self.pipe = pipeline("text-classification", model=self.model, tokenizer=self.tokenizer, device=0)
+      self.pipe = pipeline("text-classification", model=self.model, tokenizer=self.tokenizer, device='cpu')
 
    def __call__(self, dataset):
       labels, scores = [], []
