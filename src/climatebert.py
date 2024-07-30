@@ -46,7 +46,7 @@ def classify_speeches(ids, sentence_chunking, score_weighting):
       dataset_pd['label'] = labels
       dataset_pd['score'] = scores 
 
-      score = summation_score(dataset_pd, weight = int(args.score_weighting))
+      score = summation_score(dataset_pd, weight = int(score_weighting))
       scores.append(score)
 
    return scores
