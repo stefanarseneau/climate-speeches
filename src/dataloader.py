@@ -48,7 +48,12 @@ class DataLoader:
 
     def fetch_text(self, id: str, sentence_chunking: int = 1):
         speech = self.search_index[self.search_index.url.str.contains(id)]
-        assert len(speech) == 1
+        
+        try:
+            assert len(speech) == 1
+        except AssertionError:
+            print('search error:', id, 'found', len(speech), 'matching patterns')
+            return '', '', '', '', '', '', '', ''
 
         url = speech['url'].iloc[0]
         title = speech['title'].iloc[0]
