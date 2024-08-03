@@ -11,8 +11,8 @@ import argparse
 
 class ClimateBert:
    def __init__(self, max_len: int = 512):
-      self.dataset_name = "climatebert/climate_commitments_actions"
-      self.model_name = "climatebert/distilroberta-base-climate-commitment"
+      self.dataset_name = "climatebert/climate_detection"
+      self.model_name = "climatebert/distilroberta-base-climate-detector"
 
       self.model = AutoModelForSequenceClassification.from_pretrained(self.model_name)
       self.tokenizer = AutoTokenizer.from_pretrained(self.model_name, max_len=max_len)
