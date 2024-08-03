@@ -29,15 +29,17 @@ class ClimateBert:
    
 def summation_score(pd_dataset, weight):
    classifier = 2*np.all([pd_dataset['label'] == 'yes'], axis = 0).astype(int) - 1
+   raw_scores = classifier.copy()
    classifier[classifier > 0] *= weight
    score = sum(classifier * pd_dataset['score']) / len(pd_dataset)
-   return score
+   return score, raw_scores
 
 def classify_speeches(ids, sentence_chunking, score_weighting):
    scores = []
 
    dat = dl.DataLoader()
    CB_Classifier = ClimateBert()
+   parameters = {}
 
    for i, id in enumerate(tqdm(ids)):
       url, title, description, author, date, text, dataset_pd, dataset_hf = dat.fetch_text(id, sentence_chunking = int(sentence_chunking))
@@ -47,12 +49,14 @@ def classify_speeches(ids, sentence_chunking, score_weighting):
           dataset_pd['label'] = labels
           dataset_pd['score'] = scores 
 
-          score = summation_score(dataset_pd, weight = int(score_weighting))
+          score, raw_scores = summation_score(dataset_pd, weight = int(score_weighting))
+          parameters[id] = raw_scores
           scores.append(score)
       else:
           scores.append(-999)
+          parameters[id] = []
 
-   return ids, scores
+   return ids, scores, parameters
 
 if __name__ == "__main__":
    parser = argparse.ArgumentParser()

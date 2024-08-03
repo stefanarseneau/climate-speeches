@@ -43,7 +43,7 @@ def fetch_speeches(years):
     return speeches
 
 class DataLoader:
-    def __init__(self, years = [2020, 2021, 2022, 2023, 2024]) -> None:
+    def __init__(self, years = [2024]) -> None:
         self.search_index = fetch_speeches(years)
 
     def fetch_text(self, id: str, sentence_chunking: int = 1):

@@ -2,6 +2,7 @@ import dataloader as dl
 import climatebert as cb
 
 from urllib.parse import urlparse
+import pickle 
 import pandas as pd
 import argparse
 import os
@@ -34,7 +35,10 @@ if __name__ == "__main__":
 
     print(f'number of ids in dataset: {len(ids)}')
 
-    ids, scores = cb.classify_speeches(ids, int(args.sentence_chunking), int(args.score_weighting))
+    ids, scores, parameters = cb.classify_speeches(ids, int(args.sentence_chunking), int(args.score_weighting))
+
+    with open('raw_scores.pkl', 'wb') as f:
+        pickle.dump(parameters, f)
     
     print(len(ids), len(scores))
 
