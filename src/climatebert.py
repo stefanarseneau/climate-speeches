@@ -52,7 +52,7 @@ def classify_speeches(ids, sentence_chunking, score_weighting):
       else:
           scores.append(-999)
 
-   return scores
+   return ids, scores
 
 if __name__ == "__main__":
    parser = argparse.ArgumentParser()

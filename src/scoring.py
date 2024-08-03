@@ -31,7 +31,12 @@ if __name__ == "__main__":
 
     dataset = fetch_dataset(args.dataset)
     ids = dataset['id']
+
+    print(f'number of ids in dataset: {len(ids)}')
+
+    ids, scores = cb.classify_speeches(ids, int(args.sentence_chunking), int(args.score_weighting))
     
-    scores = cb.classify_speeches(ids, int(args.sentence_chunking), int(args.score_weighting))
+    print(len(ids), len(scores))
+
     dataset['climatebert_scores'] = scores
     dataset.to_csv(args.dataset + '.csv')
