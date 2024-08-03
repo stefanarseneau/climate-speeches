@@ -8,7 +8,9 @@ import argparse
 import os
 
 def fetch_dataset(dataset_name):
-    if dataset_name == 'identified':
+    if os.path.exists(dataset_name):
+        dataset = pd.read_csv(dataset_name)
+    elif dataset_name == 'identified':
         dataset = dl.load_zipfile()
     else:
         loader = dl.DataLoader()
@@ -41,8 +43,6 @@ if __name__ == "__main__":
     if args.raw_outfile is not None:
         with open(args.raw_outfile, 'wb') as f:
             pickle.dump(parameters, f)
-    
-    print(len(ids), len(scores))
 
     dataset['climatebert_scores'] = scores
     dataset.to_csv(args.dataset + '.csv')

@@ -35,7 +35,7 @@ def summation_score(pd_dataset, weight):
    return score, raw_scores
 
 def classify_speeches(ids, sentence_chunking, score_weighting):
-   scores = []
+   final_scores = []
 
    dat = dl.DataLoader()
    CB_Classifier = ClimateBert()
@@ -51,12 +51,12 @@ def classify_speeches(ids, sentence_chunking, score_weighting):
 
           score, raw_scores = summation_score(dataset_pd, weight = int(score_weighting))
           parameters[id] = raw_scores
-          scores.append(score)
+          final_scores.append(score)
       else:
           scores.append(-999)
           parameters[id] = []
 
-   return ids, scores, parameters
+   return ids, final_scores, parameters
 
 if __name__ == "__main__":
    parser = argparse.ArgumentParser()
