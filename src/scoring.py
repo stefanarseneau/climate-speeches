@@ -20,6 +20,7 @@ def fetch_dataset(dataset_name):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('dataset', nargs='?')
+    parser.add_argument('--raw-outfile', nargs='?', default=None)
     parser.add_argument('--sentence-chunking', nargs='?', default=None)
     parser.add_argument('--score-weighting', nargs='?', default='1')
     args = parser.parse_args()
@@ -37,8 +38,9 @@ if __name__ == "__main__":
 
     ids, scores, parameters = cb.classify_speeches(ids, int(args.sentence_chunking), int(args.score_weighting))
 
-    with open('raw_scores.pkl', 'wb') as f:
-        pickle.dump(parameters, f)
+    if args.raw_outfile is not None:
+        with open(args.raw_outfile, 'wb') as f:
+            pickle.dump(parameters, f)
     
     print(len(ids), len(scores))
 
