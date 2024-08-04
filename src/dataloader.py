@@ -1,11 +1,13 @@
 import glob
 import io
+import os
 import re
 import argparse
 import pandas as pd
 
 import zipfile
 from urllib.request import urlopen
+from urllib.parse import urlparse
 from datasets import Dataset, DatasetDict
 
 def load_zipfile() -> pd.DataFrame:
@@ -39,6 +41,8 @@ def fetch_speeches(years):
         xlsx_path = zip.namelist()[0] # get the name of the excel file
         with zip.open(xlsx_path) as f:
             data = pd.read_csv(f)
+        
+        data['id'] = [('').join(os.path.basename(urlparse(url).path).split('.')[:-1]) for url in data['url']]  
         speeches = pd.concat([speeches, data])
     return speeches
 
@@ -49,7 +53,7 @@ class DataLoader:
         self.search_index = fetch_speeches(years)
 
     def fetch_text(self, id: str, sentence_chunking: int = 1):
-        speech = self.search_index[self.search_index.url.str.contains(id)]
+        speech = self.search_index[self.search_index.id == id]
         
         try:
             assert len(speech) == 1

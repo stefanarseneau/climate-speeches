@@ -15,7 +15,6 @@ def fetch_dataset(dataset_name):
     else:
         loader = dl.DataLoader()
         dataset = loader.search_index
-        dataset['id'] = [os.path.basename(urlparse(url).path).split('.')[0] for url in dataset['url']]
     return dataset
 
 
