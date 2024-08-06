@@ -28,8 +28,8 @@ class ClimateBert:
       return labels, scores
    
 def summation_score(pd_dataset, weight):
-   classifier = 2*np.all([pd_dataset['label'] == 'yes'], axis = 0).astype(int) - 1
-   classifier *= pd_dataset['score']
+   classifier = (2*np.all([pd_dataset['label'] == 'yes'], axis = 0).astype(float) - 1)
+   classifier *= pd_dataset['score'].to_numpy()
    raw_scores = classifier.copy()
    classifier[classifier > 0] *= weight
    score = sum(classifier ) / len(pd_dataset)
@@ -53,6 +53,7 @@ def classify_speeches(ids, sentence_chunking, score_weighting):
           score, raw_scores = summation_score(dataset_pd, weight = int(score_weighting))
           parameters[id] = raw_scores
           final_scores.append(score)
+          
       else:
           final_scores.append(-999)
           parameters[id] = []

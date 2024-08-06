@@ -44,4 +44,5 @@ if __name__ == "__main__":
             pickle.dump(parameters, f)
 
     dataset['climatebert_scores'] = scores
+    dataset = dataset.drop('text', axis=1)
     dataset.to_csv(args.dataset + '.csv')
