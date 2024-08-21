@@ -28,10 +28,7 @@ def classify_speeches(ids, sentence_chunking, score_weighting):
         url, title, description, author, date, text, dataset_pd, dataset_hf = dat.fetch_text(id, sentence_chunking = int(sentence_chunking))
 
         if dataset_hf != '':
-            print('making query...')
-            print(dataset_pd)
-
-            response = client.chat.completions.create(
+            completion = client.chat.completions.create(
                             model="gpt-3.5-turbo",
                             messages=[
                                 {
@@ -46,12 +43,17 @@ def classify_speeches(ids, sentence_chunking, score_weighting):
                             temperature=0.7,
                             top_p=1
                         )
-            print(title)
-            print(response)
 
-            #score, raw_scores = summation_score(dataset_pd, weight = int(score_weighting))
-            #parameters[id] = raw_scores
-            #final_scores.append(score)
+            response = completion.choices[0].message.content.lower()
+            parameters[id] = response
+
+            if response == 'yes':
+                final_scores.append(1)
+            elif response == 'no':
+                final_scores.append(0)
+            else:
+                final_scores.append(999)
+
         else:
             final_scores.append(-999)
             parameters[id] = []
@@ -65,5 +67,6 @@ if __name__ == "__main__":
    parser.add_argument('--score-weighting', nargs='?', default='1')
    args = parser.parse_args()
 
-   scores = classify_speeches([args.id], int(args.sentence_chunking), int(args.score_weighting))
-   print('speech', args.id, 'final score:', scores[0])
+   ids, final_scores, parameters = classify_speeches([args.id], int(args.sentence_chunking), int(args.score_weighting))
+   print(parameters[args.id])
+   print(final_scores)

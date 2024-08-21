@@ -1,5 +1,6 @@
 import dataloader as dl
 import climatebert as cb
+import gpt
 
 from urllib.parse import urlparse
 import pickle 
@@ -21,6 +22,7 @@ def fetch_dataset(dataset_name):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('dataset', nargs='?')
+    parser.add_argument('--classifier', nargs='?', default=None)
     parser.add_argument('--raw-outfile', nargs='?', default=None)
     parser.add_argument('--sentence-chunking', nargs='?', default=None)
     parser.add_argument('--score-weighting', nargs='?', default='1')
@@ -32,12 +34,21 @@ if __name__ == "__main__":
         print("Please specify a supported dataset: 'identified' or 'all'!")
         raise
 
+    try:
+        assert args.classifier in ['gpt', 'climatebert']
+    except AssertionError as e:
+        print("Please specify a supported dataset: 'gpt' or 'climatebert'!")
+        raise
+
     dataset = fetch_dataset(args.dataset)
     ids = dataset['id']
 
     print(f'number of ids in dataset: {len(ids)}')
 
-    ids, scores, parameters = cb.classify_speeches(ids, int(args.sentence_chunking), int(args.score_weighting))
+    if args.classifier == 'climatebert':
+        ids, scores, parameters = cb.classify_speeches(ids, int(args.sentence_chunking), int(args.score_weighting))
+    elif args.classifier == 'gpt':
+        ids, scores, parameters = gpt.classify_speeches(ids, int(args.sentence_chunking), int(args.score_weighting))
 
     if args.raw_outfile is not None:
         with open(args.raw_outfile, 'wb') as f:
