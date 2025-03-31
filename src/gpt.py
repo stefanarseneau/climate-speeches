@@ -47,13 +47,13 @@ class GPTClassifier:
 
         return labels, scores
    
-def summation_score(scores):
-    classifier = (2*np.all([pd_dataset['label'] == 'yes'], axis = 0).astype(float) - 1)
-    classifier *= pd_dataset['score'].to_numpy()
-    raw_scores = classifier.copy()
-    classifier[classifier > 0] *= weight
-    score = sum(classifier ) / len(pd_dataset)
-    return score, raw_scores
+#def summation_score(scores):
+#    classifier = (2*np.all([pd_dataset['label'] == 'yes'], axis = 0).astype(float) - 1)
+#    classifier *= pd_dataset['score'].to_numpy()
+#    raw_scores = classifier.copy()
+#    classifier[classifier > 0] *= weight
+#    score = sum(classifier ) / len(pd_dataset)
+#    return score, raw_scores
 
 def classify_speeches(ids, sentence_chunking, score_weighting):
     final_scores = []
